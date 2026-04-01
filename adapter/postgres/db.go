@@ -1,0 +1,60 @@
+package postgres
+
+import (
+	"time"
+	"github.com/ncostamagna/go-sp-products/domain"
+	"gorm.io/gorm"
+)
+
+
+type repository struct {
+	db *gorm.DB
+}
+
+func NewRepository(dbGorm *gorm.DB) *repository {
+	return &repository{db: dbGorm}
+}
+
+func (r *repository) Store(p domain.Product) (domain.Product, error) {
+	now := time.Now()
+	p.CreatedAt = &domain.DateTime{Time: now}
+	p.UpdatedAt = &domain.DateTime{Time: now}
+	if err := r.db.Create(&p).Error; err != nil {
+		return domain.Product{}, err
+	}
+	return p, nil
+}
+
+func (r *repository) GetAll() ([]domain.Product) {
+	var p []domain.Product
+	if err := r.db.Find(&p).Error; err != nil {
+		return []domain.Product{}
+	}
+	return p
+}
+
+func (r *repository) GetById(id string) (domain.Product, error) {
+	var p domain.Product
+	if err := r.db.First(&p, "id = ?", id).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return domain.Product{}, ErrProductNotFound
+		}
+		return domain.Product{}, err
+	}
+	return p, nil
+}
+
+func (r *repository) Update(id string, p domain.Product) (domain.Product, error) {
+	p.UpdatedAt = &domain.DateTime{Time: time.Now()}
+	if err := r.db.Model(&p).Where("id = ?", id).Updates(&p).Error; err != nil {
+		return domain.Product{}, err
+	}
+	return r.GetById(id)
+}
+
+func (r *repository) Delete(id string) error {
+	if err := r.db.Where("id = ?", id).Delete(&domain.Product{}).Error; err != nil {
+		return err
+	}
+	return nil
+}
