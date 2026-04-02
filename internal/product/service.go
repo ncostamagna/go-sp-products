@@ -62,36 +62,18 @@ func (s *service) Update(id string, p domain.Product) (domain.Product, error) {
 		return domain.Product{}, ErrIdRequired
 	}
 
-	if p.Name == nil || *p.Name == "" {
+	if p.Name != nil && *p.Name == "" {
 		return domain.Product{}, ErrNameRequired
 	}
-	if p.Price == nil {
-		return domain.Product{}, ErrPriceRequired
-	} 
-	if *p.Price < 0 {
+	if p.Price != nil && *p.Price < 0 {
 		return domain.Product{}, ErrPriceNegative
-	}
-
-	_, err := s.repo.GetById(id)
-	if err != nil {
-		if errors.Is(err, postgres.ErrProductNotFound) {
-			return domain.Product{}, ErrProductNotFound
-		}
-		return domain.Product{}, err
-	}
+	} 
 	return s.repo.Update(id, p)
 }
 
 func (s *service) Delete(id string) error {
 	if id == "" {
 		return ErrIdRequired
-	}
-	_, err := s.repo.GetById(id)
-	if err != nil {
-		if errors.Is(err, postgres.ErrProductNotFound) {
-			return ErrProductNotFound
-		}
-		return err
 	}
 	return s.repo.Delete(id)
 }
