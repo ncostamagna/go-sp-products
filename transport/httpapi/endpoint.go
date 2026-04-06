@@ -85,8 +85,7 @@ func makeUpdate(s product.Service) gin.HandlerFunc {
 			return
 		}
 
-		res, err := s.Update(id, req)
-		if err != nil {
+		if err := s.Update(id, req); err != nil {
 			if errors.Is(err, product.ErrProductNotFound) {
 				c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 				return
@@ -98,7 +97,7 @@ func makeUpdate(s product.Service) gin.HandlerFunc {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
-		c.JSON(http.StatusOK, gin.H{"data": res})
+		c.JSON(http.StatusOK, gin.H{"message": "Product updated successfully"})
 	}
 }
 

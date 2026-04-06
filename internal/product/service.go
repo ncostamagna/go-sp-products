@@ -12,7 +12,7 @@ type Service interface {
 	Store(p domain.Product) (domain.Product, error)
 	GetAll() ([]domain.Product)
 	GetById(id string) (domain.Product, error)
-	Update(id string, p domain.Product) (domain.Product, error)
+	Update(id string, p domain.Product) error
 	Delete(id string) error
 }
 
@@ -57,16 +57,16 @@ func (s *service) GetById(id string) (domain.Product, error) {
 		return p, nil
 }
 
-func (s *service) Update(id string, p domain.Product) (domain.Product, error) {
+func (s *service) Update(id string, p domain.Product) error {
 	if id == "" {
-		return domain.Product{}, ErrIdRequired
+		return ErrIdRequired
 	}
 
 	if p.Name != nil && *p.Name == "" {
-		return domain.Product{}, ErrNameRequired
+		return ErrNameRequired
 	}
 	if p.Price != nil && *p.Price < 0 {
-		return domain.Product{}, ErrPriceNegative
+		return ErrPriceNegative
 	} 
 	return s.repo.Update(id, p)
 }

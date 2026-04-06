@@ -40,15 +40,15 @@ func (r *repository) GetById(id string) (domain.Product, error) {
 	return p, nil
 }
 
-func (r *repository) Update(id string, p domain.Product) (domain.Product, error) {
+func (r *repository) Update(id string, p domain.Product) error {
 	result := r.db.Model(&p).Where("id = ?", id).Updates(&p)
 	if result.Error != nil {
-		return domain.Product{}, result.Error
+		return result.Error
 	}
 	if result.RowsAffected == 0 {
-		return domain.Product{}, ErrProductNotFound
+		return ErrProductNotFound
 	}
-	return p, nil
+	return nil
 }
 
 func (r *repository) Delete(id string) error {
