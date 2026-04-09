@@ -1,7 +1,6 @@
 package postgres
 
 import (
-	"time"
 	"github.com/ncostamagna/go-sp-products/domain"
 	"gorm.io/gorm"
 )
@@ -16,9 +15,6 @@ func NewRepository(dbGorm *gorm.DB) *repository {
 }
 
 func (r *repository) Store(p domain.Product) (domain.Product, error) {
-	now := time.Now()
-	p.CreatedAt = &domain.DateTime{Time: now}
-	p.UpdatedAt = &domain.DateTime{Time: now}
 	if err := r.db.Create(&p).Error; err != nil {
 		return domain.Product{}, err
 	}
@@ -44,17 +40,24 @@ func (r *repository) GetById(id string) (domain.Product, error) {
 	return p, nil
 }
 
-func (r *repository) Update(id string, p domain.Product) (domain.Product, error) {
-	p.UpdatedAt = &domain.DateTime{Time: time.Now()}
-	if err := r.db.Model(&p).Where("id = ?", id).Updates(&p).Error; err != nil {
-		return domain.Product{}, err
+func (r *repository) Update(id string, p domain.Product) error {
+	result := r.db.Model(&p).Where("id = ?", id).Updates(&p)
+	if result.Error != nil {
+		return result.Error
 	}
-	return r.GetById(id)
+	if result.RowsAffected == 0 {
+		return ErrProductNotFound
+	}
+	return nil
 }
 
 func (r *repository) Delete(id string) error {
-	if err := r.db.Where("id = ?", id).Delete(&domain.Product{}).Error; err != nil {
-		return err
+	result := r.db.Where("id = ?", id).Delete(&domain.Product{})
+	if result.Error != nil {
+		return result.Error
+	}
+	if result.RowsAffected == 0 {
+		return ErrProductNotFound
 	}
 	return nil
 }
