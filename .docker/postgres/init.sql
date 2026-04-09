@@ -1,1 +1,1 @@
-CREATE DATABASE lpt_p01;
+CREATE DATABASE go_sp_products;

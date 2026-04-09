@@ -90,15 +90,7 @@ func makeUpdate(s product.Service) gin.HandlerFunc {
 				c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 				return
 			}
-			if errors.Is(err, product.ErrIdRequired) {
-				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-				return
-			}
-			if errors.Is(err, product.ErrNameRequired) || errors.Is(err, product.ErrPriceNegative) {
-				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-				return
-			}
-			if errors.Is(err, product.ErrPriceRequired) {
+			if errors.Is(err, product.ErrIdRequired) || errors.Is(err, product.ErrNameRequired) || errors.Is(err, product.ErrPriceNegative) || errors.Is(err, product.ErrPriceRequired) {
 				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 				return
 			}
